@@ -7,7 +7,7 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = MobSpawnTweaks.MODID, version = MobSpawnTweaks.VERSION)
+@Mod(modid = MobSpawnTweaks.MODID, version = MobSpawnTweaks.VERSION, acceptableRemoteVersions="*")
 public class MobSpawnTweaks
 {
     public static final String MODID = "MobSpawnTweaks";
