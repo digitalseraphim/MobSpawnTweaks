@@ -17,13 +17,17 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-0.2"
+version = "1.7.10-0.3"
 group= "digitalseraphim.mst" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "MobSpawnTweaks"
 
 minecraft {
     version = "1.7.10-10.13.0.1208"
     assetDir = "eclipse/assets"
+
+    replace "@MC_VERSION@", project.minecraft.version
+    replace "@VERSION@", project.version
+    replaceIn "MobSpawnTweaks.java"
 }
 
 dependencies {
@@ -42,6 +46,9 @@ dependencies {
 
 }
 
+minecraft {
+}
+
 processResources
 {
     // this will ensure that this task is redone when the versions change.
@@ -51,7 +58,6 @@ processResources
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
         // replace version and mcversion
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
