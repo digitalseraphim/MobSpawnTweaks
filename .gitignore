@@ -4,4 +4,4 @@
 .settings
 bin
 eclipse
-build.properties
+private.properties

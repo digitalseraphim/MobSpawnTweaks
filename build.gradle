@@ -1,42 +1,42 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-    }
+	repositories {
+		mavenCentral()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+		maven {
+			name = "sonatype"
+			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
 }
 
 repositories {
-    mavenCentral()
-    maven {
-        name = "forge"
-        url = "http://files.minecraftforge.net/maven"
-    }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-    maven {
-        name 'CB Maven FS'
-        url "http://chickenbones.net/maven/"
-    }
-    maven {
-        name "ProfMobius Maven FS"
-        url "http://mobiusstrip.eu/maven"
-    }
-    maven {
-        name 'DVS1 Maven FS'
-        url 'http://dvs1.progwml6.com/files/maven'
-    }
+	mavenCentral()
+	maven {
+		name = "forge"
+		url = "http://files.minecraftforge.net/maven"
+	}
+	maven {
+		name = "sonatype"
+		url = "https://oss.sonatype.org/content/repositories/snapshots/"
+	}
+	maven {
+		name 'CB Maven FS'
+		url "http://chickenbones.net/maven/"
+	}
+	maven {
+		name "ProfMobius Maven FS"
+		url "http://mobiusstrip.eu/maven"
+	}
+	maven {
+		name 'DVS1 Maven FS'
+		url 'http://dvs1.progwml6.com/files/maven'
+	}
 }
 
 apply plugin: "curseforge"
@@ -45,29 +45,36 @@ apply plugin: 'forge'
 ext.configFile = file "build.properties"
 
 configFile.withReader {
-    // Load config.  It shall from now be referenced as simply config or project.config
-    def prop = new Properties()
-    prop.load(it)
-    project.ext.config = new ConfigSlurper().parse prop
+	// Load config.  It shall from now be referenced as simply config or project.config
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.config = new ConfigSlurper().parse prop
 }
 
-version = "${config.minecraft_version}-${config.mod_version}"
-group= "digitalseraphim.mst" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "MobSpawnTweaks"
+ext.privateConfig = file "private.properties"
+privateConfig.withReader {
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.priv = new ConfigSlurper().parse prop
+}
+
+version = "${config.minecraft_version}-${config.proj_version}"
+group = "${config.proj_group}"
+archivesBaseName = "${config.proj_name}"
 
 minecraft {
-    version = "${config.minecraft_version}-${config.forge_version}"
-    runDir = "eclipse/assets"
+	version = "${config.minecraft_version}-${config.forge_version}"
+	runDir = "eclipse/assets"
 
-    replace "@MC_VERSION@", project.minecraft.version
-    replace "@VERSION@", project.version
-    replaceIn "MobSpawnTweaks.java"
+	replace "@MC_VERSION@", project.minecraft.version
+	replace "@VERSION@", project.version
+	replaceIn "${config.proj_name}.java"
 }
 
 
 task deobfJar(type: Jar, dependsOn: 'classes') {
-    from sourceSets.main.output
-    classifier = 'deobf'
+	from sourceSets.main.output
+	classifier = 'deobf'
 }
 tasks.assemble.dependsOn deobfJar
 
@@ -77,8 +84,7 @@ dependencies {
 }
 
 curse {
-
-	apiKey = "${config.curse_api_key}"
+	apiKey = "${priv.curse_api_key}"
 	projectId = "${config.curse_proj_id}"
 	releaseType = "${config.curse_release_type}"
 	additionalArtifact deobfJar
@@ -86,19 +92,19 @@ curse {
 
 processResources
 {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+	// this will ensure that this task is redone when the versions change.
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
+	// replace stuff in mcmod.info, nothing else
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		// replace version and mcversion
+		expand 'version':project.version, 'mcversion':project.minecraft.version
+	}
+		
+	// copy everything else, thats not the mcmod.info
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
 }
