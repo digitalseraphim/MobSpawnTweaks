@@ -7,21 +7,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-
 public class FilterMobSpawns {
-	private Map<Integer, Pair<Boolean, HashList<String>>> whiteBlackLists = new HashMap();
+	private Map<Integer, Pair<Boolean, HashList<String>>> whiteBlackLists = new HashMap<Integer, Pair<Boolean, HashList<String>>>();
 
 	@SubscribeEvent
 	public void onEntitySpawn(EntityJoinWorldEvent ejwe) {
@@ -56,6 +56,41 @@ public class FilterMobSpawns {
 		}
 	}
 
+	@SubscribeEvent
+	public void onPotentialSpawns(WorldEvent.PotentialSpawns potentialSpawns){
+		int dimid = potentialSpawns.world.provider.dimensionId;
+		
+		Pair<Boolean, HashList<String>> whiteBlackList = whiteBlackLists
+				.get(dimid);
+		if (whiteBlackList != null) {
+
+			Iterator<SpawnListEntry> i = potentialSpawns.list.iterator();
+			
+			while(i.hasNext()){
+				SpawnListEntry sle = i.next();
+				
+					
+				String name = EntityList.classToStringMapping.get(sle.entityClass).toString();
+				HashList<String> l = whiteBlackList.getRight();
+				String className = sle.entityClass.getCanonicalName();
+				
+				boolean inList = l.contains(name) || l.contains(className);
+		
+				// if it is in the list, and list is blacklist, cancel
+				// if it is not in the list, and list is whitelist, cancel
+				if (inList != whiteBlackList.getLeft()) {
+					if (MobSpawnTweaks.debug) {
+						System.out.println("want to cancel "
+								+ className
+								+ " named: " + name);
+					}
+					i.remove();
+				}
+			}
+		}
+		
+	}
+	
 	@SubscribeEvent
 	public void onWorldLoad(WorldEvent.Load loadEvent) {
 		int dimid = loadEvent.world.provider.dimensionId;
@@ -92,10 +127,12 @@ public class FilterMobSpawns {
 		}
 	}
 
+	
+	
 	private HashList<String> processList(String[] names){
 		Map s2c = EntityList.stringToClassMapping;
 		List<String> ll = Arrays.asList(names);
-		HashList<String> ret = new HashList();
+		HashList<String> ret = new HashList<String>();
 		
 		for(Object o: s2c.keySet()){
 			String name = (String)o;

@@ -11,7 +11,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2.0.777'
 	}
 }
 
@@ -63,7 +63,7 @@ group = "${config.proj_group}"
 archivesBaseName = "${config.proj_name}"
 
 minecraft {
-	version = "${config.minecraft_version}-${config.forge_version}"
+	version = "${config.minecraft_version}-${config.forge_version}-${config.minecraft_version}"
 	runDir = "eclipse/assets"
 
 	replace "@MC_VERSION@", project.minecraft.version
